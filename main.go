@@ -37,7 +37,7 @@ func main() {
 		if payload.PushData.PushedAt != 0 {
 			log.Println("Image push event detected")
 
-			cli, err := client.NewClientWithOpts(client.FromEnv)
+			cli, err := client.NewClientWithOpts(client.WithVersion("1.43"))
 			if err != nil {
 				log.Fatalf("Error creating Docker client: %v", err)
 			}
