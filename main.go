@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os/exec"
@@ -35,8 +36,12 @@ func main() {
 		if payload.PushData.PushedAt != 0 {
 			log.Println("Image push event detected")
 
+			dockerpull := fmt.Sprintf(
+				"docker pull %s",
+				payload.Repository.RepoName,
+			)
 			//nolint: gosec
-			cmd := exec.Command("docker", "pull", payload.Repository.RepoName)
+			cmd := exec.Command("/bin/bash", "-c", dockerpull)
 			_, err := cmd.Output()
 			if err != nil {
 				log.Println("Error pulling image:", err)
