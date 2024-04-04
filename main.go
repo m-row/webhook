@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os/exec"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,14 +23,15 @@ func main() {
 		if event, ok := payload["event"].(string); ok && event == "push" {
 			log.Println("Image push event detected")
 
-			// TODO:
-
-			// cmd := exec.Command("docker", "pull", "your_image_name")
-			// _, err := cmd.Output()
-			// if err != nil {
-			// 	log.Println("Error pulling image:", err)
-			// 	return c.String(http.StatusInternalServerError, "Internal Server Error")
-			// }
+			cmd := exec.Command("docker", "pull", "sadeemtech/webhook")
+			_, err := cmd.Output()
+			if err != nil {
+				log.Println("Error pulling image:", err)
+				return c.String(
+					http.StatusInternalServerError,
+					"Internal Server Error",
+				)
+			}
 
 			// TODO: restarting containers, etc.
 
