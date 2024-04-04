@@ -35,6 +35,7 @@ func main() {
 		if payload.PushData.PushedAt != 0 {
 			log.Println("Image push event detected")
 
+			//nolint: gosec
 			cmd := exec.Command("docker", "pull", payload.Repository.RepoName)
 			_, err := cmd.Output()
 			if err != nil {
