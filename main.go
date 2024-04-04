@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"os/exec"
 
+	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/client"
 	"github.com/labstack/echo/v4"
 )
 
@@ -36,21 +37,17 @@ func main() {
 		if payload.PushData.PushedAt != 0 {
 			log.Println("Image push event detected")
 
-			dockerpull := fmt.Sprintf(
-				"docker pull %s",
-				payload.Repository.RepoName,
-			)
-			//nolint: gosec
-			cmd := exec.Command("/bin/bash", "-c", dockerpull)
-			_, err := cmd.Output()
+			cli, err := client.NewClientWithOpts(client.FromEnv)
 			if err != nil {
-				log.Println("Error pulling image:", err)
-				return c.String(
-					http.StatusInternalServerError,
-					"Internal Server Error",
-				)
+				log.Fatalf("Error creating Docker client: %v", err)
 			}
-
+			if _, err = cli.ImagePull(
+				context.Background(),
+				payload.Repository.RepoName,
+				image.PullOptions{},
+			); err != nil {
+				log.Fatalf("Error pulling image: %v", err)
+			}
 			// TODO: restarting containers, etc.
 
 			return c.String(
