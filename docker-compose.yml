@@ -19,3 +19,5 @@ services:
         environment:
           APP_VER: "${APP_VER}"
           CONTAINER_NAME: "${CONTAINER_NAME}"
+          DOCKER_USERNAME: "${DOCKER_USERNAME}"
+          DOCKER_PASSWORD: "${DOCKER_PASSWORD}"

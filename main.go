@@ -5,14 +5,32 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
+	username := os.Getenv("DOCKER_USERNAME")
+	password := os.Getenv("DOCKER_PASSWORD")
+
 	e := echo.New()
+	cli, err := client.NewClientWithOpts(client.WithVersion("1.43"))
+	if err != nil {
+		log.Fatalf("Error creating Docker client: %v", err)
+	}
+	authConfig := registry.AuthConfig{
+		Username: username,
+		Password: password,
+	}
+	res, err := cli.RegistryLogin(context.Background(), authConfig)
+	if err != nil {
+		log.Fatalf("Error RegistryLogin: %v", err)
+	}
+	log.Println("RegistryLogin res:", res.Status)
 
 	e.POST("/pull", func(c echo.Context) error {
 		var payload Payload
@@ -37,10 +55,6 @@ func main() {
 		if payload.PushData.PushedAt != 0 {
 			log.Println("Image push event detected")
 
-			cli, err := client.NewClientWithOpts(client.WithVersion("1.43"))
-			if err != nil {
-				log.Fatalf("Error creating Docker client: %v", err)
-			}
 			if _, err = cli.ImagePull(
 				context.Background(),
 				payload.Repository.RepoName,
