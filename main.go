@@ -13,7 +13,7 @@ func main() {
 	e := echo.New()
 
 	e.POST("/pull", func(c echo.Context) error {
-		var payload map[string]any
+		var payload Payload
 
 		if err := c.Bind(&payload); err != nil {
 			log.Println("Error parsing JSON:", err)
@@ -28,11 +28,14 @@ func main() {
 			"----------------------------------------------------------------",
 		)
 		log.Println("Webhook received json:", string(b))
+		log.Println(
+			"----------------------------------------------------------------",
+		)
 
-		if event, ok := payload["event"].(string); ok && event == "push" {
+		if payload.PushData.PushedAt != 0 {
 			log.Println("Image push event detected")
 
-			cmd := exec.Command("docker", "pull", "sadeemtech/webhook")
+			cmd := exec.Command("docker", "pull", payload.Repository.RepoName)
 			_, err := cmd.Output()
 			if err != nil {
 				log.Println("Error pulling image:", err)
