@@ -25,7 +25,7 @@ func main() {
 			log.Println("marshal err: ", err.Error())
 		}
 		log.Println(
-			"================================================================",
+			"----------------------------------------------------------------",
 		)
 		log.Println("Webhook received json:", string(b))
 
