@@ -1,0 +1,24 @@
+version: '3.9'
+
+networks:
+    sadeem:
+        external: true
+
+services:
+    webhooks:
+        container_name: "${CONTAINER_NAME}"
+        image: "sadeem/${CONTAINER_NAME}:${CONTAINER_TAG}"
+        restart: always
+        networks:
+            - sadeem
+        ports:
+            - "${PORT}:${PORT}"
+        build:
+            context: .
+            dockerfile: Dockerfile
+        environment:
+          APP_VER: "${APP_VER}"
+          PORT: "${PORT}"
+          CONTAINER_NAME: "${CONTAINER_NAME}"
+        volumes:
+            - .env:/.env
