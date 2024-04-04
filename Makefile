@@ -12,7 +12,7 @@ dh:
 	docker compose -f docker-compose.yml up --build -d
 dh/down:
 	docker compose -f docker-compose.yml down
-dh/push:
+dh/push: dh
 	docker tag sadeem/${CONTAINER_IMG} ${CONTAINER_REG}/${CONTAINER_IMG}
 	docker tag sadeem/${CONTAINER_IMG} ${CONTAINER_REG}/${CONTAINER_NAME}:latest
 	docker push ${CONTAINER_REG}/${CONTAINER_NAME} -a
