@@ -19,15 +19,15 @@ func main() {
 			log.Println("Error parsing JSON:", err)
 			return c.String(http.StatusBadRequest, "Bad Request")
 		}
-		log.Println("Webhook received:", payload)
 		b, err := json.Marshal(payload)
 		if err != nil {
 			log.Println("marshal err: ", err.Error())
 		}
+		log.Println("Webhook received json:", string(b))
 		log.Println(
 			"----------------------------------------------------------------",
 		)
-		log.Println("Webhook received json:", string(b))
+		log.Println("Webhook received PushedAt:", payload.PushData.PushedAt)
 		log.Println(
 			"----------------------------------------------------------------",
 		)
