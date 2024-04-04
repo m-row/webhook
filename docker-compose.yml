@@ -11,8 +11,8 @@ services:
         restart: always
         networks:
             - sadeem
-        ports:
-            - "${PORT}:${PORT}"
+        expose:
+            - "${PORT}"
         build:
             context: .
             dockerfile: Dockerfile
