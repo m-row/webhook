@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"os/exec"
@@ -19,6 +20,14 @@ func main() {
 			return c.String(http.StatusBadRequest, "Bad Request")
 		}
 		log.Println("Webhook received:", payload)
+		b, err := json.Marshal(payload)
+		if err != nil {
+			log.Println("marshal err: ", err.Error())
+		}
+		log.Println(
+			"================================================================",
+		)
+		log.Println("Webhook received json:", string(b))
 
 		if event, ok := payload["event"].(string); ok && event == "push" {
 			log.Println("Image push event detected")
