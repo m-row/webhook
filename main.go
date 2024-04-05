@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"log"
@@ -24,11 +25,19 @@ func main() {
 		context.Background(),
 		time.Second*60,
 	)
+	log.Print("username", username)
+	log.Print("password", password)
 	authConfig := registry.AuthConfig{
-		ServerAddress: "https://index.docker.io/v1",
-		Username:      username,
-		Password:      password,
+		Username: username,
+		Password: password,
 	}
+	encodedJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		log.Fatalf("error when encoding authConfig. err: %v", err)
+	}
+
+	authStr := base64.URLEncoding.EncodeToString(encodedJSON)
+	log.Printf("authStr created: %s", authStr)
 	cli, err := client.NewClientWithOpts(
 		client.WithVersion("1.43"),
 	)
@@ -48,6 +57,7 @@ func main() {
 		log.Fatalf("Error RegistryLogin: %v", err)
 	}
 	log.Printf("RegistryLogin res: %s", res.Status)
+	log.Printf("RegistryLogin res.IdentityToken: %s", res.IdentityToken)
 
 	e.POST("/pull", func(c echo.Context) error {
 		var payload Payload
@@ -75,7 +85,9 @@ func main() {
 			out, err := cli.ImagePull(
 				ctx,
 				payload.Repository.RepoName,
-				image.PullOptions{},
+				image.PullOptions{
+					RegistryAuth: authStr,
+				},
 			)
 			if err != nil {
 				log.Fatalf("Error pulling image: %v", err)
