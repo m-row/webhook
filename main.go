@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
@@ -17,50 +20,72 @@ func main() {
 	password := os.Getenv("DOCKER_PASSWORD")
 
 	e := echo.New()
-	cli, err := client.NewClientWithOpts(client.WithVersion("1.43"))
-	if err != nil {
-		e.Logger.Fatalf("Error creating Docker client: %v", err)
-	}
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		time.Second*60,
+	)
 	authConfig := registry.AuthConfig{
-		Username: username,
-		Password: password,
+		ServerAddress: "https://index.docker.io/v1",
+		Username:      username,
+		Password:      password,
 	}
-	res, err := cli.RegistryLogin(context.Background(), authConfig)
+	cli, err := client.NewClientWithOpts(
+		client.WithVersion("1.43"),
+	)
 	if err != nil {
-		e.Logger.Fatalf("Error RegistryLogin: %v", err)
+		log.Fatalf("Error creating Docker client: %v", err)
 	}
-	e.Logger.Info("RegistryLogin res:", res.Status)
+	log.Printf("client created: %s", cli.ClientVersion())
+
+	ping, err := cli.Ping(ctx)
+	if err != nil {
+		log.Fatalf("Error pinging Docker client: %v", err)
+	}
+	log.Printf("client pinged: %s", ping.APIVersion)
+
+	res, err := cli.RegistryLogin(ctx, authConfig)
+	if err != nil {
+		log.Fatalf("Error RegistryLogin: %v", err)
+	}
+	log.Printf("RegistryLogin res: %s", res.Status)
 
 	e.POST("/pull", func(c echo.Context) error {
 		var payload Payload
 
 		if err := c.Bind(&payload); err != nil {
-			e.Logger.Info("Error parsing JSON:", err)
+			log.Print("Error parsing JSON:", err)
 			return c.String(http.StatusBadRequest, "Bad Request")
 		}
 		b, err := json.Marshal(payload)
 		if err != nil {
-			e.Logger.Info("marshal err: ", err.Error())
+			log.Print("marshal err: ", err.Error())
 		}
-		e.Logger.Info("Webhook received json:", string(b))
-		e.Logger.Info(
+		log.Print("Webhook received json:", string(b))
+		log.Print(
 			"----------------------------------------------------------------",
 		)
-		e.Logger.Info("Webhook received PushedAt:", payload.PushData.PushedAt)
-		e.Logger.Info(
+		log.Print("Webhook received PushedAt:", payload.PushData.PushedAt)
+		log.Print(
 			"----------------------------------------------------------------",
 		)
 
 		if payload.PushData.PushedAt != 0 {
-			e.Logger.Info("Image push event detected")
+			log.Print("Image push event detected")
 
-			if _, err = cli.ImagePull(
-				context.Background(),
+			out, err := cli.ImagePull(
+				ctx,
 				payload.Repository.RepoName,
 				image.PullOptions{},
-			); err != nil {
-				e.Logger.Fatalf("Error pulling image: %v", err)
+			)
+			if err != nil {
+				log.Fatalf("Error pulling image: %v", err)
 			}
+			defer out.Close()
+			body, err := io.ReadAll(out)
+			if err != nil {
+				panic(err)
+			}
+			log.Println("out body:", string(body))
 			// TODO: restarting containers, etc.
 
 			return c.String(
@@ -69,6 +94,7 @@ func main() {
 			)
 		}
 
+		defer cancel()
 		return c.String(http.StatusBadRequest, "Invalid Webhook Event")
 	})
 
