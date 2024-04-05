@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
@@ -21,12 +20,7 @@ func main() {
 	password := os.Getenv("DOCKER_PASSWORD")
 
 	e := echo.New()
-	ctx, cancel := context.WithTimeout(
-		context.Background(),
-		time.Second*60,
-	)
-	log.Print("username", username)
-	log.Print("password", password)
+	ctx := context.Background()
 	authConfig := registry.AuthConfig{
 		Username: username,
 		Password: password,
@@ -106,7 +100,6 @@ func main() {
 			)
 		}
 
-		defer cancel()
 		return c.String(http.StatusBadRequest, "Invalid Webhook Event")
 	})
 
