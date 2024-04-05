@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -111,10 +110,7 @@ func main() {
 			creatRes, err := cli.ContainerCreate(
 				ctx,
 				&container.Config{
-					Image: fmt.Sprintf("%s:%s",
-						payload.Repository.RepoName,
-						payload.PushData.Tag,
-					),
+					Image: payload.Repository.Name,
 				},
 				nil,
 				&network.NetworkingConfig{
