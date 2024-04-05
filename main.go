@@ -110,7 +110,7 @@ func main() {
 			creatRes, err := cli.ContainerCreate(
 				ctx,
 				&container.Config{
-					Image: payload.Repository.Name,
+					Image: payload.Repository.RepoName,
 				},
 				nil,
 				&network.NetworkingConfig{
