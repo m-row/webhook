@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/labstack/echo/v4"
@@ -89,10 +91,42 @@ func main() {
 			defer out.Close()
 			body, err := io.ReadAll(out)
 			if err != nil {
-				panic(err)
+				log.Print("body ReadAll error: ", err.Error())
 			}
 			log.Println("out body:", string(body))
-			// TODO: restarting containers, etc.
+
+			if err := cli.ContainerRemove(
+				ctx,
+				payload.Repository.Name,
+				container.RemoveOptions{
+					RemoveVolumes: false,
+					RemoveLinks:   false,
+					Force:         true,
+				},
+			); err != nil {
+				log.Print("container restart error: ", err.Error())
+			}
+
+			creatRes, err := cli.ContainerCreate(
+				ctx,
+				&container.Config{
+					Image: payload.Repository.Name,
+				},
+				nil,
+				&network.NetworkingConfig{
+					EndpointsConfig: map[string]*network.EndpointSettings{
+						"sadeem": {
+							NetworkID: "sadeem",
+						},
+					},
+				},
+				nil,
+				"",
+			)
+			if err != nil {
+				log.Print("container create error: ", err.Error())
+			}
+			log.Println("container created id: ", creatRes.ID)
 
 			return c.String(
 				http.StatusOK,
