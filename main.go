@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -104,13 +105,16 @@ func main() {
 					Force:         true,
 				},
 			); err != nil {
-				log.Print("container restart error: ", err.Error())
+				log.Print("container remove error: ", err.Error())
 			}
 
 			creatRes, err := cli.ContainerCreate(
 				ctx,
 				&container.Config{
-					Image: payload.Repository.Name,
+					Image: fmt.Sprintf("%s:%s",
+						payload.Repository.RepoName,
+						payload.PushData.Tag,
+					),
 				},
 				nil,
 				&network.NetworkingConfig{
