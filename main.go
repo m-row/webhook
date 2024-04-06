@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
@@ -40,6 +41,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating Docker client: %v", err)
 	}
+	defer cli.Close()
 	log.Printf("client created: %s", cli.ClientVersion())
 
 	ping, err := cli.Ping(ctx)
@@ -148,6 +150,20 @@ func main() {
 				}
 			case <-statusCh:
 			}
+
+			execRes, err := cli.ContainerExecCreate(
+				ctx,
+				"nginx",
+				types.ExecConfig{
+					AttachStderr: true,
+					AttachStdout: true,
+					Cmd:          []string{"nginx", "-s", "reload"},
+				},
+			)
+			if err != nil {
+				log.Print("container exec error: ", err.Error())
+			}
+			log.Print("container exec res.ID: ", execRes.ID)
 
 			return c.String(
 				http.StatusOK,
