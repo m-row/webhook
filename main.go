@@ -121,12 +121,33 @@ func main() {
 					},
 				},
 				nil,
-				"",
+				payload.Repository.Name,
 			)
 			if err != nil {
 				log.Print("container create error: ", err.Error())
 			}
 			log.Println("container created id: ", creatRes.ID)
+			log.Println("container created warnings: ", creatRes.Warnings)
+			if err := cli.ContainerStart(
+				ctx,
+				creatRes.ID,
+				container.StartOptions{},
+			); err != nil {
+				log.Print("container start error: ", err.Error())
+			}
+
+			statusCh, errCh := cli.ContainerWait(
+				ctx,
+				creatRes.ID,
+				container.WaitConditionNotRunning,
+			)
+			select {
+			case err := <-errCh:
+				if err != nil {
+					log.Print("container status error: ", err.Error())
+				}
+			case <-statusCh:
+			}
 
 			return c.String(
 				http.StatusOK,
