@@ -113,7 +113,6 @@ func main() {
 
 			publvol := fmt.Sprintf("%s-public", payload.Repository.Name)
 			privvol := fmt.Sprintf("%s-private", payload.Repository.Name)
-			rootvol := fmt.Sprintf("%s-root", payload.Repository.Name)
 
 			mounts := []mount.Mount{
 				{
@@ -125,11 +124,6 @@ func main() {
 					Type:   mount.TypeVolume,
 					Source: privvol,
 					Target: "/private",
-				},
-				{
-					Type:   mount.TypeVolume,
-					Source: rootvol,
-					Target: "/",
 				},
 			}
 			creatRes, err := cli.ContainerCreate(
