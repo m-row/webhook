@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
@@ -109,12 +111,35 @@ func main() {
 				log.Print("container remove error: ", err.Error())
 			}
 
+			publvol := fmt.Sprintf("%s-public", payload.Repository.Name)
+			privvol := fmt.Sprintf("%s-private", payload.Repository.Name)
+			rootvol := fmt.Sprintf("%s-root", payload.Repository.Name)
+
+			mounts := []mount.Mount{
+				{
+					Type:   mount.TypeVolume,
+					Source: publvol,
+					Target: "/public",
+				},
+				{
+					Type:   mount.TypeVolume,
+					Source: privvol,
+					Target: "/private",
+				},
+				{
+					Type:   mount.TypeVolume,
+					Source: rootvol,
+					Target: "/",
+				},
+			}
 			creatRes, err := cli.ContainerCreate(
 				ctx,
 				&container.Config{
 					Image: payload.Repository.RepoName,
 				},
-				nil,
+				&container.HostConfig{
+					Mounts: mounts,
+				},
 				&network.NetworkingConfig{
 					EndpointsConfig: map[string]*network.EndpointSettings{
 						"sadeem": {
