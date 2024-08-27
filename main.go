@@ -79,12 +79,21 @@ func main() {
 			"----------------------------------------------------------------",
 		)
 
+		tag := "latest"
+		if c.QueryParams().Has("factory") {
+			tag = "factory"
+		}
+
 		if payload.PushData.PushedAt != 0 {
 			log.Print("Image push event detected")
-
+			fullImageName := fmt.Sprintf(
+				"%s:%s",
+				payload.Repository.RepoName,
+				tag,
+			)
 			out, err := cli.ImagePull(
 				ctx,
-				payload.Repository.RepoName,
+				fullImageName,
 				image.PullOptions{
 					RegistryAuth: authStr,
 				},
