@@ -158,7 +158,7 @@ func main() {
 					},
 				},
 				nil,
-				payload.Repository.RepoName,
+				payload.Repository.Name,
 			)
 			if err != nil {
 				log.Print("container create error: ", err.Error())
