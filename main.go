@@ -158,7 +158,7 @@ func main() {
 					},
 				},
 				nil,
-				fullImageName,
+				payload.Repository.RepoName,
 			)
 			if err != nil {
 				log.Print("container create error: ", err.Error())
