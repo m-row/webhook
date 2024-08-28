@@ -87,6 +87,13 @@ func main() {
 
 		if payload.PushData.PushedAt != 0 {
 			log.Print("Image push event detected")
+			if payload.Repository.RepoName == "webhook" {
+				log.Print("ignoring webhook push event")
+				return c.String(
+					http.StatusBadRequest,
+					"webhook self push event",
+				)
+			}
 			fullImageName := fmt.Sprintf(
 				"%s:%s",
 				payload.Repository.RepoName,
