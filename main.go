@@ -155,7 +155,7 @@ func main() {
 					Architecture: "amd64",
 					OS:           "linux",
 				},
-				payload.Repository.Name,
+				fullImageName,
 			)
 			if err != nil {
 				log.Print("container create error: ", err.Error())
