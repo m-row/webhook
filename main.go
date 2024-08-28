@@ -18,7 +18,6 @@ import (
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/labstack/echo/v4"
-	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 func main() {
@@ -158,10 +157,7 @@ func main() {
 						},
 					},
 				},
-				&v1.Platform{
-					Architecture: "amd64",
-					OS:           "linux",
-				},
+				nil,
 				fullImageName,
 			)
 			if err != nil {
