@@ -140,10 +140,6 @@ func main() {
 				ctx,
 				&container.Config{
 					Image: fullImageName,
-					Volumes: map[string]struct{}{
-						publvol: {},
-						privvol: {},
-					},
 				},
 				&container.HostConfig{
 					Mounts: mounts,
