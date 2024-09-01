@@ -1,27 +1,25 @@
-version: '3.9'
+version: "3.9"
 
 networks:
-    sadeem:
-        external: true
+  sadeem:
+    external: true
 
 services:
-    webhooks:
-        container_name: "${CONTAINER_NAME}"
-        image: "sadeem/${CONTAINER_NAME}:${CONTAINER_TAG}"
-        restart: always
-        networks:
-            - sadeem
-        expose:
-            - 8000
-        # ports:
-        #     - "8000:8000"
-        build:
-            context: .
-            dockerfile: Dockerfile
-        # volumes:
-        #     - /var/run/docker.sock:/var/run/docker.sock
-        environment:
-          APP_VER: "${APP_VER}"
-          CONTAINER_NAME: "${CONTAINER_NAME}"
-          DOCKER_USERNAME: "${DOCKER_USERNAME}"
-          DOCKER_PASSWORD: "${DOCKER_PASSWORD}"
+  webhooks:
+    container_name: "${CONTAINER_NAME}"
+    image: "sadeem/${CONTAINER_NAME}:${CONTAINER_TAG}"
+    restart: always
+    networks:
+      - sadeem
+    expose:
+      - 8000
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      APP_VER: "${APP_VER}"
+      CONTAINER_NAME: "${CONTAINER_NAME}"
+      DOCKER_USERNAME: "${DOCKER_USERNAME}"
+      DOCKER_PASSWORD: "${DOCKER_PASSWORD}"
