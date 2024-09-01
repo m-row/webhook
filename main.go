@@ -87,8 +87,11 @@ func main() {
 		}
 
 		tag := "latest"
+		// lab project location
+		src := "/root/docker/projects"
 		if c.QueryParams().Has("factory") {
 			tag = "factory"
+			src = "/home/docker/projects"
 		}
 
 		if payload.PushData.PushedAt != 0 {
@@ -127,18 +130,23 @@ func main() {
 				log.Print("container remove error: ", err.Error())
 			}
 
-			publvol := fmt.Sprintf("%s-public", payload.Repository.Name)
-			privvol := fmt.Sprintf("%s-private", payload.Repository.Name)
-
 			mounts := []mount.Mount{
 				{
-					Type:   mount.TypeVolume,
-					Source: publvol,
+					Type: mount.TypeBind,
+					Source: fmt.Sprintf(
+						"%s/%s/public",
+						src,
+						payload.Repository.Name,
+					),
 					Target: "/public",
 				},
 				{
-					Type:   mount.TypeVolume,
-					Source: privvol,
+					Type: mount.TypeBind,
+					Source: fmt.Sprintf(
+						"%s/%s/private",
+						src,
+						payload.Repository.Name,
+					),
 					Target: "/private",
 				},
 			}
