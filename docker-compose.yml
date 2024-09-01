@@ -16,8 +16,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    # volumes:
+    #   - /var/run/docker.sock:/var/run/docker.sock
     environment:
       APP_VER: "${APP_VER}"
       CONTAINER_NAME: "${CONTAINER_NAME}"
