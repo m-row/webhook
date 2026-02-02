@@ -38,7 +38,7 @@ func main() {
 	authStr := base64.URLEncoding.EncodeToString(encodedJSON)
 	log.Printf("authStr created: %s", authStr)
 	cli, err := client.NewClientWithOpts(
-		client.WithVersion("1.43"),
+		client.WithVersion("1.53"),
 	)
 	if err != nil {
 		log.Fatalf("Error creating Docker client: %v", err)
